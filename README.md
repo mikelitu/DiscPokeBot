@@ -14,8 +14,7 @@ If you are using this on Windows use this instead:
 
 To run the bot in your local PC change the `"your token"` part on the code for your token value generated on the Discord Developer Window. I recommend adding a *.venv* on the folder containing all the necessary token values under different names, so you do not need to hard write it in your code. The read for this environment variable is already implemented with **dotenv**, in the following lines:
 
-```
-python3
+```python3
 
 load_dotenv(find_dotenv())
 TOKEN = os.getenv('your token name')
