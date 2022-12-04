@@ -30,12 +30,12 @@ Now you can start using the bot in your local PC. If you want to have the bot ru
 
 ## Contents
 
-The file *evs_poke.txt* contains all the information for evs of the pokemons. Right now this is the best way I have to handle this data. However, I will like to make a much more cleaner data structure on the future to share this data and for faster reading. If you are interested, every Pokemon's information is spread across 10 lines, so we use the *chunker* function to get these blocks. *utils.py* contains all this necessary functions to read and reformat the data to something more understandable for us.
+All the data has been transfered to the Pokemon.csv inside the pokemonData folder. This new file contains more information about the stats and the evs. Included the Pokemons for the 9th Generation. The file takes as reference the csv files on the [pokemonData](https://github.com/lgreski/pokemonData) repository.
 
 ## Logs
 
  * **(30/11/22)** First commit
- * **Coming soon**: New data format for the information, easier to read and handle
+ * **(04/12/22)**: New data format for the information, easier to read and handle
  * **Coming soon**: Connection with more information of the Pokemons (similar to [PokeAPI](https://pokeapi.co/))
  * **Coming soon**: Improved message format
 
