@@ -1,105 +1,68 @@
-def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-
-def get_evs():
-
-    with open("evs_poke.txt") as file_object:
-        lines = file_object.readlines()
-
-    new_lines = lines[1:]
-    headers = get_headers(new_lines)
-    new_lines = new_lines[7:]
-    poke_list = []
-    
-    for poke_lines in chunker(new_lines, 10):
-        pokemon = get_pokemon(poke_lines, headers)
-        poke_list.append(pokemon)
-
-    return poke_list
-
-def get_headers(lines):
-
-    header_lines = lines[:7]
-    headers = []
-    
-    for header_line in header_lines:
-        splitted = header_line.split('|')
-        further_split = splitted[1].split('\n')
-        header = further_split[0][1:]
-        headers.append(header)
-    
-    return headers
-
-def get_pokemon(lines, headers):
-    imp_lines = lines[1:]
-    info = {}
-
-    for i, line in enumerate(imp_lines):
-
-        if i == 0:
-            splitted = line.split(' ')
-            further_split = splitted[1].split('\n')
-            poke_num = further_split[0]
-            info['N Pokedex'] = poke_num
-        
-        elif i == 1:
-            splitted = line.split('{')
-            further_split = splitted[2].split('}')
-            poke_name = further_split[0][2:]
-            info['Name'] = poke_name
-        
-        else:
-            splitted = line.split(' ')
-            further_split = splitted[1].split('\n')
-            stat = further_split[0]
-            info[headers[i-2]] = stat
-        
-    return info
-
-def get_pokemon_from_name(name, poke_list):
-
-    i = 0
-
-    while i < len(poke_list):
-
-        if name == poke_list[i]['Name'].lower():
-            return poke_list[i]
-        
-        i += 1
-    
-    return None
-
-def get_pokemon_from_idx(idx, poke_list):
-    if idx-1 > len(poke_list) or idx <= 0:
-        return None
-    return poke_list[idx-1]
+import pandas as pd
+import numpy as np
+import discord
 
 
-def write_message(name, poke_list):
+def write_message_stats(name, poke_df):
 
-    if name.isnumeric():
-        pokemon = get_pokemon_from_idx(int(name), poke_list)
-    else:
-        pokemon = get_pokemon_from_name(name, poke_list)
+    pokemon = get_poke_from_name(name, poke_df)
     
     if pokemon is None:
-        if name.isnumeric():
-            return "There is no Pokemon with pokedex number {}".format(name)
-        else:
-            return "There is no pokemon with name {}".format(name)
+        return "No hay pokemon con nombre {}".format(name)
 
     name = pokemon['Name']
-    num = pokemon['N Pokedex']
-    exp = pokemon['Exp. base']
-    ps = pokemon['PS']
-    atack = pokemon['Ataque']
-    defense = pokemon['Defensa']
-    s_attack = pokemon['Ataque esp.']
-    s_defense = pokemon['Defensa esp.']
-    vel = pokemon['Velocidad']
+    ps = pokemon['HP']
+    atack = pokemon['Attack']
+    defense = pokemon['Defense']
+    s_attack = pokemon['Sp. Atk']
+    s_defense = pokemon['Sp. Def']
+    vel = pokemon['Speed']
 
-    msg = "NAME: {}\nPOKEDEX: {}\nBASE EXP.: {}\nPS: {}\nATTACK: {}\nDEFENSE: {}\nESP. ATTACK: {}\nESP. DEFENSE: {}\nSPEED: {}\n".format(
-        name, num, exp, ps, atack, defense, s_attack, s_defense, vel
-    )
+    msg = (discord.Embed(title="STATS",
+                         description='```css\n{}\n```'.format(name),
+                         color=discord.Color.blurple())
+            .add_field(name="PS", value=ps)
+            .add_field(name="Ataque", value=atack)
+            .add_field(name="Defensa", value=defense)
+            .add_field(name="Ataque Especial", value=s_attack)
+            .add_field(name="Defensa Especial", value=s_defense)
+            .add_field(name="Velocidad", value=vel))
 
     return msg
+
+def write_message_evs(name, poke_df):
+
+    pokemon = get_poke_from_name(name, poke_df)
+    
+    if pokemon is None:
+        return "No hay pokemon con nombre {}".format(name)
+
+    name = pokemon['Name']
+    ps = pokemon['HP EV']
+    atack = pokemon['Atk EV']
+    defense = pokemon['Def EV']
+    s_attack = pokemon['Sp. Atk EV']
+    s_defense = pokemon['Sp. Def EV']
+    vel = pokemon['Spe EV']
+
+
+    msg = (discord.Embed(title="EV",
+                         description='```css\n{}\n```'.format(name),
+                         color=discord.Color.blurple())
+            .add_field(name="PS", value=ps)
+            .add_field(name="Ataque", value=atack)
+            .add_field(name="Defensa", value=defense)
+            .add_field(name="Ataque Especial", value=s_attack)
+            .add_field(name="Defensa Especial", value=s_defense)
+            .add_field(name="Velocidad", value=vel))
+
+    return msg
+
+def get_poke_from_name(name: str, poke_df: pd.DataFrame):
+
+    mask = poke_df["Name"].str.lower() == name.lower()
+    pos = np.flatnonzero(mask)
+    if len(pos) < 1:
+        return None
+    info = poke_df.iloc[pos]
+    return info

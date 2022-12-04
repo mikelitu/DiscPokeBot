@@ -7,23 +7,31 @@ from discord import Interaction
 from discord.ext.commands import Context
 from dotenv import load_dotenv, find_dotenv
 import utils
-import asyncio
+import pandas as pd
 
 
-poke_list = utils.get_evs()
+poke_df = pd.read_csv("pokemonData/Pokemon.csv")
+
 
 load_dotenv(find_dotenv())
-TOKEN = os.getenv('your token name')
+TOKEN = os.getenv('POKE_DISCORD_TOKEN')
 
 intents = discord.Intents.all()
 
 client = commands.Bot(command_prefix='$', intents=intents)
 
 @client.command(
-    help="$evs [Pokemon name]|[Pokemon idx (not the same in the Pokedex!)] -> EVs you get for fighting him"
+    help="$evs [Nombre del pokemon] -> Los EVs que te da al combatir"
 )
 async def evs(ctx: Context, pokemon):
-    msg = utils.write_message(pokemon.lower(), poke_list)
+    msg = utils.write_message_evs(pokemon, poke_df)
     await ctx.channel.send(msg)
 
-client.run("your token here")
+@client.command(
+    help="$stats [Nombre del pokemon] -> Stats del Pokemon"
+)
+async def stats(ctx: Context, pokemon):
+    msg = utils.write_message_stats(pokemon, poke_df)
+    await ctx.channel.send(msg)
+
+client.run(TOKEN)
